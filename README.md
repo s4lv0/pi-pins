@@ -36,8 +36,10 @@ Long conversations bury useful answers (tables, plans, command outputs). Pin the
 ## Install
 
 ```bash
-pi install git:git@github.com/s4lv0/pi-pins
+pi install https://github.com/s4lv0/pi-pins
 ```
+
+Or with SSH: `pi install git:git@github.com:s4lv0/pi-pins`
 
 Then `/reload` in pi.
 
