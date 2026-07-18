@@ -2,6 +2,8 @@
 
 A [pi](https://github.com/earendil-works/pi-coding-agent) extension to **pin assistant messages** and recall them in an interactive overlay browser — without taking permanent screen space.
 
+![pi-pins preview](./assets/preview.svg)
+
 ## Why
 
 Long conversations bury useful answers (tables, plans, command outputs). Pin them the moment they appear, recall them later in a floating markdown-rendered overlay.
