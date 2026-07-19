@@ -6,7 +6,7 @@ on:
 
 permissions:
   contents: read
-  id-token: write # npm provenance
+  id-token: write # npm trusted publishing (OIDC) + provenance
 
 jobs:
   publish:
@@ -17,10 +17,11 @@ jobs:
           persist-credentials: false
 
       # No dependency cache is enabled (no `cache:` input), so cache poisoning does not apply.
+      # No registry-url / token: auth uses npm trusted publishing (OIDC).
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0 # zizmor: ignore[cache-poisoning]
         with:
-          node-version: 22
-          registry-url: https://registry.npmjs.org
+          # Trusted publishing requires npm >= 11.5.1; node 24.5+ bundles npm 11.5.1
+          node-version: 24
 
       - name: Check tag matches package.json version
         env:
@@ -32,7 +33,5 @@ jobs:
             exit 1
           fi
 
-      - name: Publish
+      - name: Publish (trusted publishing + provenance)
         run: npm publish --provenance --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
