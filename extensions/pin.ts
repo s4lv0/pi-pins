@@ -18,12 +18,19 @@
  * /reload, restarts, and /resume, and follow the session tree branch.
  */
 
-import {	type ExtensionAPI,
+import {
+	type ExtensionAPI,
 	type ExtensionCommandContext,
 	getMarkdownTheme,
 	type Theme,
 } from "@earendil-works/pi-coding-agent";
-import { type Focusable, Markdown, matchesKey, truncateToWidth, visibleWidth } from "@earendil-works/pi-tui";
+import {
+	type Focusable,
+	Markdown,
+	matchesKey,
+	truncateToWidth,
+	visibleWidth,
+} from "@earendil-works/pi-tui";
 
 const STATE_TYPE = "pin-state";
 const PICK_COUNT = 10;
@@ -50,7 +57,9 @@ function extractText(content: unknown): string {
 	if (!Array.isArray(content)) return "";
 	return content
 		.filter((p): p is { type: string; text: string } =>
-			Boolean(p && typeof p === "object" && (p as { type?: string }).type === "text"),
+			Boolean(
+				p && typeof p === "object" && (p as { type?: string }).type === "text",
+			),
 		)
 		.map((p) => p.text)
 		.join("\n")
@@ -105,7 +114,10 @@ class PinBrowser implements Focusable {
 	}
 
 	private listRows(): number {
-		return Math.max(1, Math.min(this.pins.length, 6, Math.floor(this.viewport / 3)));
+		return Math.max(
+			1,
+			Math.min(this.pins.length, 6, Math.floor(this.viewport / 3)),
+		);
 	}
 
 	private contentRows(): number {
@@ -117,7 +129,11 @@ class PinBrowser implements Focusable {
 	}
 
 	handleInput(data: string): void {
-		if (matchesKey(data, "escape") || matchesKey(data, "return") || data === "q") {
+		if (
+			matchesKey(data, "escape") ||
+			matchesKey(data, "return") ||
+			data === "q"
+		) {
 			this.done();
 			return;
 		}
@@ -125,7 +141,10 @@ class PinBrowser implements Focusable {
 		if (matchesKey(data, "up")) {
 			this.contentScroll = Math.max(0, this.contentScroll - 1);
 		} else if (matchesKey(data, "down")) {
-			this.contentScroll = Math.min(this.maxContentScroll(), this.contentScroll + 1);
+			this.contentScroll = Math.min(
+				this.maxContentScroll(),
+				this.contentScroll + 1,
+			);
 		} else if (matchesKey(data, "pageUp")) {
 			this.selected = Math.max(0, this.selected - 1);
 			this.contentScroll = 0;
@@ -143,27 +162,42 @@ class PinBrowser implements Focusable {
 		const th = this.theme;
 		const w = Math.max(30, Math.min(100, width - 2));
 		const innerW = w - 2;
-		const pad = (s: string) => s + " ".repeat(Math.max(0, innerW - visibleWidth(s)));
+		const pad = (s: string) =>
+			s + " ".repeat(Math.max(0, innerW - visibleWidth(s)));
 		const row = (c: string) =>
-			th.fg("border", "│") + pad(truncateToWidth(c, innerW)) + th.fg("border", "│");
+			th.fg("border", "│") +
+			pad(truncateToWidth(c, innerW)) +
+			th.fg("border", "│");
 		const sep = th.fg("border", `├${"─".repeat(innerW)}┤`);
 
 		const listRows = this.listRows();
 		const contentRows = this.contentRows();
 
 		const out: string[] = [th.fg("border", `╭${"─".repeat(innerW)}╮`)];
-		out.push(row(th.fg("accent", `📌 ${this.pins.length} pin${this.pins.length === 1 ? "" : "s"}`)));
+		out.push(
+			row(
+				th.fg(
+					"accent",
+					`📌 ${this.pins.length} pin${this.pins.length === 1 ? "" : "s"}`,
+				),
+			),
+		);
 		out.push(sep);
 
 		// Pin list, windowed around the selection
 		const start = Math.max(
 			0,
-			Math.min(this.selected - Math.floor(listRows / 2), this.pins.length - listRows),
+			Math.min(
+				this.selected - Math.floor(listRows / 2),
+				this.pins.length - listRows,
+			),
 		);
 		for (let i = start; i < start + listRows; i++) {
 			const p = this.pins[i]!;
 			const line = `${i === this.selected ? "❯" : " "} #${p.id} · ${p.label} · ${fmtTime(p.pinnedAt)}`;
-			out.push(row(i === this.selected ? th.fg("accent", line) : th.fg("dim", line)));
+			out.push(
+				row(i === this.selected ? th.fg("accent", line) : th.fg("dim", line)),
+			);
 		}
 		out.push(sep);
 
@@ -172,7 +206,10 @@ class PinBrowser implements Focusable {
 		const lines = this.contentLines(pin, innerW);
 		this.contentCount = lines.length;
 		this.contentScroll = Math.min(this.contentScroll, this.maxContentScroll());
-		const visible = lines.slice(this.contentScroll, this.contentScroll + contentRows);
+		const visible = lines.slice(
+			this.contentScroll,
+			this.contentScroll + contentRows,
+		);
 		for (const l of visible) out.push(row(l));
 		for (let i = visible.length; i < contentRows; i++) out.push(row(""));
 		out.push(sep);
@@ -182,9 +219,10 @@ class PinBrowser implements Focusable {
 				? "all visible"
 				: `${this.contentScroll + 1}–${Math.min(this.contentScroll + contentRows, lines.length)}/${lines.length}`;
 		out.push(
-			row(th.fg("dim", `↑↓ scroll · PgUp/PgDn pin · g/G · q/Esc close · #${pin.id} · ${pos}`)),
+			row(th.fg("accent", "↑↓ scroll · PgUp/PgDn pin · g/G · q/Esc close")),
 		);
-		out.push(th.fg("border", `╰${"─".repeat(innerW)}╰`));
+		out.push(row(th.fg("dim", `#${pin.id} · ${pos}`)));
+		out.push(th.fg("border", `╰${"─".repeat(innerW)}╯`));
 		return out;
 	}
 }
@@ -214,9 +252,12 @@ export default function (pi: ExtensionAPI) {
 		}
 	});
 
-	function recentAssistantMessages(ctx: ExtensionCommandContext): { text: string; ago: number }[] {
+	function recentAssistantMessages(
+		ctx: ExtensionCommandContext,
+	): { text: string; ago: number }[] {
 		const out: { text: string; ago: number }[] = [];
-		const entries = ctx.sessionManager.getBranch() as unknown as SessionEntryLike[];
+		const entries =
+			ctx.sessionManager.getBranch() as unknown as SessionEntryLike[];
 		let ago = 0;
 		for (let i = entries.length - 1; i >= 0 && out.length < PICK_COUNT; i--) {
 			const e = entries[i];
@@ -229,7 +270,11 @@ export default function (pi: ExtensionAPI) {
 		return out;
 	}
 
-	function addPin(text: string, label: string | undefined, ctx: ExtensionCommandContext): void {
+	function addPin(
+		text: string,
+		label: string | undefined,
+		ctx: ExtensionCommandContext,
+	): void {
 		const pin: Pin = {
 			id: nextId++,
 			label: label?.trim() || autoLabel(text),
@@ -238,11 +283,17 @@ export default function (pi: ExtensionAPI) {
 		};
 		pins.push(pin);
 		persist();
-		ctx.ui.notify(`📌 Pinned as #${pin.id} "${pin.label}" — recall with /pin show ${pin.id}`, "info");
+		ctx.ui.notify(
+			`📌 Pinned as #${pin.id} "${pin.label}" — recall with /pin show ${pin.id}`,
+			"info",
+		);
 	}
 
 	/** Open the interactive pin browser (list + live preview). */
-	async function browse(ctx: ExtensionCommandContext, initialIndex: number): Promise<void> {
+	async function browse(
+		ctx: ExtensionCommandContext,
+		initialIndex: number,
+	): Promise<void> {
 		if (!ctx.hasUI) return;
 		if (pins.length === 0) {
 			ctx.ui.notify("No pins yet — use /pin first", "warning");
@@ -250,13 +301,25 @@ export default function (pi: ExtensionAPI) {
 		}
 		await ctx.ui.custom<void>(
 			(tui, theme, _kb, done) => {
-				// Size from the real terminal height (visible-callback runs too late)
-				const vp = Math.max(10, Math.floor(tui.terminal.rows * 0.8) - 6);
+				// Size from the real terminal height (visible-callback runs too late).
+				// Chrome takes 8 rows (2 borders + header + 3 separators + 2 footer
+				// rows); subtract it so the total fits the overlay's 80% maxHeight
+				// and the bottom border isn't clipped.
+				const CHROME_ROWS = 8;
+				const vp = Math.max(
+					10,
+					Math.floor(tui.terminal.rows * 0.8) - CHROME_ROWS,
+				);
 				return new PinBrowser(theme, pins, initialIndex, vp, () => done());
 			},
 			{
 				overlay: true,
-				overlayOptions: { width: "85%", maxHeight: "80%", anchor: "top-center", offsetY: 1 },
+				overlayOptions: {
+					width: "85%",
+					maxHeight: "80%",
+					anchor: "top-center",
+					offsetY: 1,
+				},
 			},
 		);
 	}
@@ -277,15 +340,24 @@ export default function (pi: ExtensionAPI) {
 	];
 
 	const SUBCOMMANDS = [
-		{ value: "pick", label: "pick", description: "Pick a recent message to pin" },
-		{ value: "show", label: "show", description: "Browse pins (list + live preview)" },
+		{
+			value: "pick",
+			label: "pick",
+			description: "Pick a recent message to pin",
+		},
+		{
+			value: "show",
+			label: "show",
+			description: "Browse pins (list + live preview)",
+		},
 		{ value: "rm", label: "rm", description: "Remove a pin" },
 		{ value: "clear", label: "clear", description: "Remove all pins" },
 		{ value: "help", label: "help", description: "Show help" },
 	];
 
 	pi.registerCommand("pin", {
-		description: "Pin assistant messages and recall them in an overlay viewer (/pin help)",
+		description:
+			"Pin assistant messages and recall them in an overlay viewer (/pin help)",
 		getArgumentCompletions: (prefix: string) => {
 			const items = SUBCOMMANDS.filter((s) => s.value.startsWith(prefix));
 			return items.length > 0 ? items : null;
@@ -293,74 +365,83 @@ export default function (pi: ExtensionAPI) {
 		handler: async (args, ctx) => {
 			const parts = args.trim().split(/\s+/).filter(Boolean);
 			const sub = parts[0]?.toLowerCase() ?? "";
-			const rest = args.trim().slice(parts[0]?.length ?? 0).trim();
+			const rest = args
+				.trim()
+				.slice(parts[0]?.length ?? 0)
+				.trim();
 
 			// A first word matching a subcommand counts as one only when the
 			// trailing args fit it; otherwise the whole input is a pin label.
 			const SUBS_WITH_ARGS = new Set(["show", "rm"]);
 			const isSub =
-				SUBCOMMANDS.some((s) => s.value === sub) && (rest === "" || SUBS_WITH_ARGS.has(sub));
+				SUBCOMMANDS.some((s) => s.value === sub) &&
+				(rest === "" || SUBS_WITH_ARGS.has(sub));
 
 			if (isSub) {
 				switch (sub) {
-				case "help": {
-					if (pins.length > 0) {
-						await browse(ctx, 0);
-					} else {
-						ctx.ui.notify(HELP_LINES.join("\n"), "info");
-					}
-					return;
-				}
-
-				case "clear": {
-					pins = [];
-					nextId = 1;
-					persist();
-					ctx.ui.notify("All pins removed", "info");
-					return;
-				}
-
-				case "rm": {
-					const n = Number(rest);
-					const pin = pins.find((p) => p.id === n);
-					if (!pin) {
-						ctx.ui.notify(rest ? `No pin #${rest}` : "Usage: /pin rm <n>", "error");
+					case "help": {
+						if (pins.length > 0) {
+							await browse(ctx, 0);
+						} else {
+							ctx.ui.notify(HELP_LINES.join("\n"), "info");
+						}
 						return;
 					}
-					pins = pins.filter((p) => p.id !== n);
-					persist();
-					ctx.ui.notify(`Removed pin #${n} "${pin.label}"`, "info");
-					return;
-				}
 
-				case "show": {
-					let index = 0;
-					if (rest) {
-						index = pins.findIndex((p) => p.id === Number(rest));
-						if (index < 0) {
-							ctx.ui.notify(`No pin #${rest}`, "error");
+					case "clear": {
+						pins = [];
+						nextId = 1;
+						persist();
+						ctx.ui.notify("All pins removed", "info");
+						return;
+					}
+
+					case "rm": {
+						const n = Number(rest);
+						const pin = pins.find((p) => p.id === n);
+						if (!pin) {
+							ctx.ui.notify(
+								rest ? `No pin #${rest}` : "Usage: /pin rm <n>",
+								"error",
+							);
 							return;
 						}
-					}
-					await browse(ctx, index);
-					return;
-				}
-
-				case "pick": {
-					const candidates = recentAssistantMessages(ctx);
-					if (candidates.length === 0) {
-						ctx.ui.notify("No assistant messages to pin", "warning");
+						pins = pins.filter((p) => p.id !== n);
+						persist();
+						ctx.ui.notify(`Removed pin #${n} "${pin.label}"`, "info");
 						return;
 					}
-					const labelOf = (c: { text: string; ago: number }) =>
-						`${c.ago === 1 ? "last" : `${c.ago} back`} · ${preview(c.text, 80)}`;
-					const choice = await ctx.ui.select("Pin which message?", candidates.map(labelOf));
-					if (!choice) return;
-					const found = candidates.find((c) => labelOf(c) === choice);
-					if (found) addPin(found.text, undefined, ctx);
-					return;
-				}
 
+					case "show": {
+						let index = 0;
+						if (rest) {
+							index = pins.findIndex((p) => p.id === Number(rest));
+							if (index < 0) {
+								ctx.ui.notify(`No pin #${rest}`, "error");
+								return;
+							}
+						}
+						await browse(ctx, index);
+						return;
+					}
+
+					case "pick": {
+						const candidates = recentAssistantMessages(ctx);
+						if (candidates.length === 0) {
+							ctx.ui.notify("No assistant messages to pin", "warning");
+							return;
+						}
+						const labelOf = (c: { text: string; ago: number }) =>
+							`${c.ago === 1 ? "last" : `${c.ago} back`} · ${preview(c.text, 80)}`;
+						const choice = await ctx.ui.select(
+							"Pin which message?",
+							candidates.map(labelOf),
+						);
+						if (!choice) return;
+						const found = candidates.find((c) => labelOf(c) === choice);
+						if (found) addPin(found.text, undefined, ctx);
+						return;
+					}
 				}
 				return;
 			}
