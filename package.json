@@ -1,9 +1,16 @@
 {
-  "name": "pi-pins",
+  "name": "@s4lv0/pi-pins",
   "version": "0.1.0",
   "description": "Pin assistant messages and recall them in an interactive overlay browser",
   "keywords": ["pi-package"],
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/s4lv0/pi-pins.git"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "files": [
     "extensions",
     "assets/preview.svg",

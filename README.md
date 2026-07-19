@@ -11,7 +11,7 @@ Long conversations bury useful answers (tables, plans, command outputs). Pin the
 ## Commands
 
 | Command | Description |
-|---|---|
+| --- | --- |
 | `/pin [label]` | Pin the last assistant message (label is any free text; auto-generated if omitted) |
 | `/pin pick` | Interactively pick one of the last 10 assistant messages to pin |
 | `/pin show [n]` | Open the pin browser (optionally pre-selecting pin `#n`) |
@@ -22,7 +22,7 @@ Long conversations bury useful answers (tables, plans, command outputs). Pin the
 ## Browser keys
 
 | Key | Action |
-|---|---|
+| --- | --- |
 | `↑` / `↓` | Scroll content line by line |
 | `PgUp` / `PgDn` | Switch between pins |
 | `g` / `G` | Jump to top / bottom of content |
@@ -38,12 +38,16 @@ Long conversations bury useful answers (tables, plans, command outputs). Pin the
 ## Install
 
 ```bash
-pi install https://github.com/s4lv0/pi-pins
+pi install npm:@s4lv0/pi-pins
 ```
 
-Or with SSH: `pi install git:git@github.com:s4lv0/pi-pins`
+Or straight from git: `pi install https://github.com/s4lv0/pi-pins`
+(SSH: `pi install git:git@github.com:s4lv0/pi-pins`)
 
 Then `/reload` in pi.
+
+> Installing from npm is recommended: `pi update --all` keeps npm packages
+> current, while git installs stay pinned to the ref they were installed at.
 
 ## License
 
